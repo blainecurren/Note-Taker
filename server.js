@@ -5,14 +5,14 @@ const path = require("path");
 const express = require("express");
 const app = express();
 
-const allNotes = require("./db/db.json");
+const notes = require("./db/db.json");
 
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(express.static("public"));
 
 app.get("/api/notes", (req, res) => {
-  res.json(allNotes.slice(1));
+  res.json(notes.slice(1));
 });
 
 app.get("/", (req, res) => {
@@ -27,7 +27,7 @@ app.get("*", (req, res) => {
   res.sendFile(path.join(__dirname, "./public/index.html"));
 });
 
-function createNewNote(body, notesArray) {
+function createNote(body, notesArray) {
   const newNote = body;
   if (!Array.isArray(notesArray)) notesArray = [];
 
@@ -45,7 +45,7 @@ function createNewNote(body, notesArray) {
 }
 
 app.post("/api/notes", (req, res) => {
-  const newNote = createNewNote(req.body, allNotes);
+  const newNote = createNote(req.body, notes);
   res.json(newNote);
 });
 
@@ -66,7 +66,7 @@ function deleteNote(id, notesArray) {
 }
 
 app.delete("/api/notes/:id", (req, res) => {
-  deleteNote(req.params.id, allNotes);
+  deleteNote(req.params.id, notes);
   res.json(true);
 });
 
