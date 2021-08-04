@@ -1,35 +1,33 @@
 const PORT = process.env.PORT || 3001;
-const path = require("path");
 const fs = require("fs");
+const path = require("path");
 
 const express = require("express");
 const app = express();
 
-const takenNotes = require("db/db.json");
+const allNotes = require("./db/db.json");
 
-app.use(
-  express.urlencoded({
-    extneded: true,
-  })
-);
-
+app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
-
 app.use(express.static("public"));
 
-app.get("api/takenNotes", (req, res) => {
-  res.json(takenNotes.slice(1));
+app.get("/api/notes", (req, res) => {
+  res.json(allNotes.slice(1));
 });
 
 app.get("/", (req, res) => {
-  res.sendFile(path.join(__dirname, "./dist/index.html"));
+  res.sendFile(path.join(__dirname, "./public/index.html"));
 });
 
 app.get("/notes", (req, res) => {
-  res.sendFile(path.join(__dirname, "./dist/note.html"));
+  res.sendFile(path.join(__dirname, "./public/notes.html"));
 });
 
-function makeNewNote(body, notesArray) {
+app.get("*", (req, res) => {
+  res.sendFile(path.join(__dirname, "./public/index.html"));
+});
+
+function createNewNote(body, notesArray) {
   const newNote = body;
   if (!Array.isArray(notesArray)) notesArray = [];
 
@@ -47,7 +45,7 @@ function makeNewNote(body, notesArray) {
 }
 
 app.post("/api/notes", (req, res) => {
-  const newNote = makeNewNote(req.body, takenNotes);
+  const newNote = createNewNote(req.body, allNotes);
   res.json(newNote);
 });
 
@@ -55,7 +53,7 @@ function deleteNote(id, notesArray) {
   for (let i = 0; i < notesArray.length; i++) {
     let note = notesArray[i];
 
-    if (note.id === id) {
+    if (note.id == id) {
       notesArray.splice(i, 1);
       fs.writeFileSync(
         path.join(__dirname, "./db/db.json"),
@@ -68,12 +66,10 @@ function deleteNote(id, notesArray) {
 }
 
 app.delete("/api/notes/:id", (req, res) => {
-  deleteNote(req.params.id, takenNotes);
+  deleteNote(req.params.id, allNotes);
   res.json(true);
 });
 
 app.listen(PORT, () => {
   console.log(`API server now on port ${PORT}!`);
 });
-
-
